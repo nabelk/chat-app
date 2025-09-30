@@ -110,10 +110,23 @@ export const friendRequests = async (fromUserId: string, toUserId: string) => {
       )
     );
 
+  if (existingRequest.length > 0 && existingRequest[0].status === "rejected") {
+    const requestAgain = await db
+      .update(friendRequest)
+      .set({
+        status: "pending",
+        fromUserId,
+        toUserId,
+      })
+      .where(eq(friendRequest.id, existingRequest[0].id))
+      .returning();
+    return requestAgain[0];
+  }
+
   if (existingRequest.length > 0 && existingRequest[0].status === "accepted")
     throw new Error("You're already friend with the requested user.");
 
-  if (existingRequest.length > 0) {
+  if (existingRequest.length > 0 && existingRequest[0].status === "pending") {
     throw new Error(
       "Friend request already sent from you or other away around."
     );
@@ -159,7 +172,7 @@ export const respondtoFriendRequest = async (
     const updatedRequest = await tx
       .update(friendRequest)
       .set({ status })
-      .where(eq(friendRequest.fromUserId, requestId))
+      .where(eq(friendRequest.id, requests[0].id))
       .returning();
 
     if (status === "accepted") {
@@ -225,6 +238,33 @@ export const getFriendRequest = async (userId: string) => {
   });
 
   return List;
+};
+
+export const getSentFriendRequest = async (userId: string) => {
+  const List = await db.query.friendRequest.findMany({
+    where: and(
+      eq(friendRequest.fromUserId, userId),
+      eq(friendRequest.status, "pending")
+    ),
+
+    with: {
+      toUser: true,
+    },
+  });
+
+  return List;
+};
+
+export const cancelSentFriendRequest = async (
+  id: string,
+  fromUserId: string
+) => {
+  return await db
+    .delete(friendRequest)
+    .where(
+      and(eq(friendRequest.id, id), eq(friendRequest.fromUserId, fromUserId))
+    )
+    .returning();
 };
 
 export const getConversation = async (conversationId: string) => {
