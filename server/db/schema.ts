@@ -148,6 +148,10 @@ export const friendsRequestRelations = relations(friendRequest, ({ one }) => ({
     fields: [friendRequest.fromUserId],
     references: [user.id],
   }),
+  toUser: one(user, {
+    fields: [friendRequest.toUserId],
+    references: [user.id],
+  }),
 }));
 
 export type FriendRequest = typeof friendRequest.$inferSelect;
