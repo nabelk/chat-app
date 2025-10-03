@@ -3,7 +3,7 @@ import { relations } from "drizzle-orm";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
-  name: text("name").notNull(),
+  name: text("name").notNull().unique(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
@@ -155,3 +155,26 @@ export const friendsRequestRelations = relations(friendRequest, ({ one }) => ({
 }));
 
 export type FriendRequest = typeof friendRequest.$inferSelect;
+
+export const publicRoomMessage = pgTable("public_room_message", {
+  id: text("id")
+    .primaryKey()
+    .$default(() => crypto.randomUUID()),
+  senderId: text("sender_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const publicRoomMessageRelations = relations(
+  publicRoomMessage,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [publicRoomMessage.senderId],
+      references: [user.id],
+    }),
+  })
+);
+
+export type PublicRoomMessage = typeof publicRoomMessage.$inferSelect;

@@ -7,6 +7,7 @@ import {
   message,
   friendRequest,
   friends,
+  publicRoomMessage,
 } from "./schema";
 import { and, eq, inArray, or, sql, asc, not } from "drizzle-orm";
 
@@ -273,4 +274,40 @@ export const getConversation = async (conversationId: string) => {
   });
 
   return conv;
+};
+
+export const insertPublicRoomMessage = async ({
+  senderId,
+  content,
+}: {
+  senderId: string;
+  content: string;
+}) => {
+  return await db.transaction(async (tx) => {
+    const [newMessage] = await tx
+      .insert(publicRoomMessage)
+      .values({
+        senderId,
+        content,
+      })
+      .returning();
+
+    const messageWithUserRelation = await tx.query.publicRoomMessage.findFirst({
+      where: eq(publicRoomMessage.id, newMessage.id),
+      with: { user: true },
+    });
+
+    return messageWithUserRelation;
+  });
+};
+
+export const getPublicRoomMessages = async () => {
+  const messages = await db.query.publicRoomMessage.findMany({
+    orderBy: [asc(publicRoomMessage.createdAt)],
+    with: {
+      user: true,
+    },
+  });
+
+  return messages;
 };
