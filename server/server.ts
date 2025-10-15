@@ -34,7 +34,7 @@ app.use((req, res, next) => {
   const allowedOrigins = [FRONTEND_URL] as string[];
 
   // Check for actual requests (not OPTIONS)
-  if (req.method !== "OPTIONS") {
+  if (req.method !== "OPTIONS" && req.headers["sec-fetch-mode"] !== "cors") {
     if (
       !origin ||
       !allowedOrigins.some((allowed) => origin.startsWith(allowed))
