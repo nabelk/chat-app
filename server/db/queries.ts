@@ -28,13 +28,17 @@ export const getOrCreateConversation = async (
   console.log("Existing conversations:", existing);
 
   if (existing.length > 0) {
-    return existing[0].conversationId;
+    const conv = await db.query.conversation.findFirst({
+      where: eq(conversation.id, existing[0].conversationId),
+    });
+    if (!conv) throw new Error("Conversation not found");
+    return conv;
   }
 
   // If not, create a new conversation
   const newConversation = (await db
     .insert(conversation)
-    .values({})
+    .values({ e2eEnabled: true })
     .returning()) as unknown as Conversation[];
 
   console.log("New conversation created:", newConversation);
@@ -48,7 +52,7 @@ export const getOrCreateConversation = async (
     ])
     .returning();
 
-  return newConversation[0].id;
+  return newConversation[0];
 };
 
 export const insertMessage = async ({

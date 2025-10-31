@@ -67,6 +67,7 @@ export const conversation = pgTable("conversation", {
   id: text("id")
     .primaryKey()
     .$default(() => crypto.randomUUID()),
+  e2eEnabled: boolean("e2e_enabled").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

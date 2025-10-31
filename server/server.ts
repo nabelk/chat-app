@@ -124,11 +124,14 @@ io.on("connection", async (socket: Socket) => {
       socket.emit("error", "You are not allowed to chat with this user.");
       return;
     }
-    const conversationID = await getOrCreateConversation(userId, otherUserId);
+    const conversation = await getOrCreateConversation(userId, otherUserId);
 
-    socket.join(conversationID);
-    // console.log(`User ${socket.id} joined conversation ${conversationID}`);
-    socket.emit("joined_conversation", { conversationId: conversationID });
+    socket.join(conversation.id);
+    // console.log(`User ${socket.id} joined conversation ${conversation.id}`);
+    socket.emit("joined_conversation", {
+      conversationId: conversation.id,
+      e2eEnabled: conversation.e2eEnabled,
+    });
   });
 
   socket.on("conversation_message", async (conversationID, content) => {

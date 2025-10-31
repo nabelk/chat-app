@@ -106,7 +106,7 @@ const ChatWindow = () => {
         if (currentConversationId === VITE_PUBLIC_ROOM) {
           sendMessageToPublic(newMessage);
         } else {
-          sendMessage(currentConversationId, newMessage);
+          sendMessage(newMessage);
         }
 
         handleRemoveIsTyping(currentConversationId);

@@ -7,7 +7,10 @@ export interface ServerToClientEvents {
     content: string;
     newMessage: Message;
   }) => void;
-  joined_conversation: (data: { conversationId: string }) => void;
+  joined_conversation: (data: {
+    conversationId: string;
+    e2eEnabled: boolean;
+  }) => void;
   error: (message: string) => void;
   user_online: (onlineUsers: string[]) => void;
   user_offline: (data: { userId: string }) => void;
