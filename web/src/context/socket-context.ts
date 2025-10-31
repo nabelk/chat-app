@@ -12,7 +12,7 @@ interface SocketContextType {
   socket: Socket<ServerToClientEvents, ClientToServerEvents> | null;
   socketState: SocketState;
   joinConversation: (otherUserId: string) => void;
-  sendMessage: (conversationID: string, content: string) => void;
+  sendMessage: (content: string) => Promise<void>;
   clearMessages: () => void;
   messages: {
     [conversationId: string]: M[];
