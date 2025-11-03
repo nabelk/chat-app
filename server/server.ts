@@ -46,6 +46,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.set("trust proxy", true);
+
 app.use(cors(corsOptions));
 
 app.use(helmet());
