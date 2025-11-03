@@ -46,8 +46,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.set("trust proxy", true);
-
 app.use(cors(corsOptions));
 
 app.use(helmet());
@@ -55,6 +53,32 @@ app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+
+    keyGenerator: (req: Express.Request): string => {
+      const cfIp = req.headers["cf-connecting-ip"];
+      if (typeof cfIp === "string") {
+        console.log(`[Rate Limit] CF-IP: ${cfIp}`);
+        return cfIp;
+      }
+
+      const xForwardedFor = req.headers["x-forwarded-for"];
+      if (typeof xForwardedFor === "string") {
+        const ip = xForwardedFor.split(",")[0].trim();
+        console.log(`[Rate Limit] X-Forwarded-For: ${ip}`);
+        return ip;
+      }
+      if (Array.isArray(xForwardedFor) && xForwardedFor[0]) {
+        const ip = xForwardedFor[0].split(",")[0].trim();
+        console.log(`[Rate Limit] X-Forwarded-For (array): ${ip}`);
+        return ip;
+      }
+
+      const fallbackIp = req.ip || "unknown";
+      console.log(`[Rate Limit] Fallback IP: ${fallbackIp}`);
+      return fallbackIp;
+    },
   })
 );
 
