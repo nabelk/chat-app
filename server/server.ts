@@ -55,7 +55,9 @@ app.use(
     max: 100,
     standardHeaders: true,
     legacyHeaders: false,
-
+    validate: {
+      ip: false,
+    },
     keyGenerator: (req: Express.Request): string => {
       const cfIp = req.headers["cf-connecting-ip"];
       if (typeof cfIp === "string") {
