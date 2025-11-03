@@ -14,7 +14,7 @@ import {
 } from "./db/queries";
 import { friendRouter, messageRouter } from "./routes/routers";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+import { rateLimit, ipKeyGenerator } from "express-rate-limit";
 
 const app = Express();
 const httpServer = http.createServer(app);
@@ -55,9 +55,7 @@ app.use(
     max: 100,
     standardHeaders: true,
     legacyHeaders: false,
-    validate: {
-      ip: false,
-    },
+    validate: { keyGeneratorIpFallback: false },
     keyGenerator: (req: Express.Request): string => {
       const cfIp = req.headers["cf-connecting-ip"];
       if (typeof cfIp === "string") {
@@ -77,7 +75,7 @@ app.use(
         return ip;
       }
 
-      const fallbackIp = req.ip || "unknown";
+      const fallbackIp = ipKeyGenerator(req.ip || "unknown");
       console.log(`[Rate Limit] Fallback IP: ${fallbackIp}`);
       return fallbackIp;
     },
